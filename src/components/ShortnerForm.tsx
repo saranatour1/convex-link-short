@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { use } from "react";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
@@ -43,7 +43,8 @@ const FormEl = ({ isAnonymous }: { isAnonymous?: boolean }) => {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log("form",values);
-    addUrl(values)    
+    addUrl(values)
+    form.reset()
   }
 
   return (

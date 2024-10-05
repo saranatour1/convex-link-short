@@ -74,8 +74,7 @@ export const testMutation = internalMutation({
       throw new ConvexError("Please add a valid url");
     }
     // rate limit component
-    const { ok, retryAfter } = await rateLimiter.limit(ctx, "addUrl");
-    if (ok) {
+    // const { ok, retryAfter } = await rateLimiter.limit(ctx, "addUrl");
       const randomId = randomisedId();
       const linkId = await ctx.db.insert("links", {
         name: args.name ? args.name : randomId,
@@ -87,8 +86,7 @@ export const testMutation = internalMutation({
         userId: userId,
         linkId: linkId,
       });
-    }
-  },
+     },
 });
 
 export const deleteLink = mutation({
