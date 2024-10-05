@@ -1,14 +1,16 @@
 import { z } from "zod";
-import { NoOp } from "convex-helpers/server/customFunctions";
-import { zCustomMutation, zCustomQuery, zid } from "convex-helpers/server/zod";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import { randomisedId } from "./helpers";
-import { Doc } from "./_generated/dataModel";
+import { HOUR, MINUTE, RateLimiter } from "@convex-dev/ratelimiter";
+import { components, internal } from "./_generated/api";
 
-const zMutation = zCustomMutation(mutation, NoOp);
-const zQuery = zCustomQuery(query, NoOp);
+const rateLimiter = new RateLimiter(components.ratelimiter, {
+  // One global / singleton rate limit
+  // freeTrialSignUp: { kind: "fixed window", rate: 100, period: HOUR },
+  addUrl: { kind: "token bucket", rate: 10, period: MINUTE, capacity: 3 },
+});
 
 export const viewer = query({
   args: {},
@@ -28,8 +30,40 @@ export const viewer = query({
   },
 });
 
-export const addUrl = zMutation({
-  args: { url: z.string().url(), name: z.string().optional() },
+export const addUrl = mutation({
+  args: { url: v.string(), name: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(internal.links.testMutation, {
+      name: args.name,
+      url: args.url,
+    });
+    // const userId = await getAuthUserId(ctx);
+    // if (!userId) {
+    //   throw new ConvexError("Please login to add a new url");
+    // }
+
+    // if (!args.url) {
+    //   throw new ConvexError("Please add a valid url");
+    // }
+    // // rate limit component
+    // const first = await rateLimiter.limit(ctx, "addUrl",{ key: userId } );
+
+    // const randomId = randomisedId();
+    // const linkId = await ctx.db.insert("links", {
+    //   name: args.name ? args.name : randomId,
+    //   url: args.url,
+    //   clicks: 0,
+    // });
+
+    // await ctx.db.insert("linksToUsers", {
+    //   userId: userId,
+    //   linkId: linkId,
+    // });
+  },
+});
+
+export const testMutation = internalMutation({
+  args: { url: v.string(), name: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
@@ -39,23 +73,26 @@ export const addUrl = zMutation({
     if (!args.url) {
       throw new ConvexError("Please add a valid url");
     }
+    // rate limit component
+    const { ok, retryAfter } = await rateLimiter.limit(ctx, "addUrl");
+    if (ok) {
+      const randomId = randomisedId();
+      const linkId = await ctx.db.insert("links", {
+        name: args.name ? args.name : randomId,
+        url: args.url,
+        clicks: 0,
+      });
 
-    const randomId = randomisedId();
-    const linkId = await ctx.db.insert("links", {
-      name: args.name ? args.name : randomId,
-      url: args.url,
-      clicks: 0,
-    });
-
-    await ctx.db.insert("linksToUsers", {
-      userId: userId,
-      linkId: linkId,
-    });
+      await ctx.db.insert("linksToUsers", {
+        userId: userId,
+        linkId: linkId,
+      });
+    }
   },
 });
 
-export const deleteLink = zMutation({
-  args: { id: zid("links") },
+export const deleteLink = mutation({
+  args: { id: v.id("links") },
   handler: async (ctx, args_0) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
@@ -72,8 +109,8 @@ export const deleteLink = zMutation({
   },
 });
 
-export const updateLink = zMutation({
-  args: { name: z.string().optional(), url: z.string().url().optional(), id: zid("links") },
+export const updateLink = mutation({
+  args: { name: v.string(), url: v.string(), id: v.id("links") },
   handler: async (ctx, args_0) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {

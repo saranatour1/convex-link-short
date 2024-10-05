@@ -1,11 +1,9 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { rateLimitTables } from "convex-helpers/server/rateLimit";
 
 export default defineSchema({
   ...authTables,
-  ...rateLimitTables,
   links: defineTable({
     name: v.string(),
     url: v.string(),
