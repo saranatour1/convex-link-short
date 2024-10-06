@@ -13,6 +13,7 @@
 import type * as auth from "../auth.js";
 import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
+import type * as init from "../init.js";
 import type * as links from "../links.js";
 import type * as users from "../users.js";
 
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   helpers: typeof helpers;
   http: typeof http;
+  init: typeof init;
   links: typeof links;
   users: typeof users;
 }>;
@@ -115,6 +117,57 @@ export declare const components: {
         "internal",
         { key?: string; name: string },
         null
+      >;
+    };
+  };
+  crons: {
+    public: {
+      del: FunctionReference<
+        "mutation",
+        "internal",
+        { identifier: { id: string } | { name: string } },
+        null
+      >;
+      get: FunctionReference<
+        "query",
+        "internal",
+        { identifier: { id: string } | { name: string } },
+        {
+          args: Record<string, any>;
+          functionHandle: string;
+          id: string;
+          name?: string;
+          schedule:
+            | { kind: "interval"; ms: number }
+            | { cronspec: string; kind: "cron" };
+        } | null
+      >;
+      list: FunctionReference<
+        "query",
+        "internal",
+        {},
+        Array<{
+          args: Record<string, any>;
+          functionHandle: string;
+          id: string;
+          name?: string;
+          schedule:
+            | { kind: "interval"; ms: number }
+            | { cronspec: string; kind: "cron" };
+        }>
+      >;
+      register: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          args: Record<string, any>;
+          functionHandle: string;
+          name?: string;
+          schedule:
+            | { kind: "interval"; ms: number }
+            | { cronspec: string; kind: "cron" };
+        },
+        string
       >;
     };
   };

@@ -3,7 +3,7 @@ import { internalMutation, mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import { randomisedId } from "./helpers";
-import { HOUR, MINUTE, RateLimiter } from "@convex-dev/ratelimiter";
+import { HOUR, MINUTE, RateLimiter, SECOND } from "@convex-dev/ratelimiter";
 import { components, internal } from "./_generated/api";
 
 const rateLimiter = new RateLimiter(components.ratelimiter, {
@@ -19,7 +19,7 @@ export const viewer = query({
     if (!userId) {
       throw new ConvexError("Please login to add a new url");
     }
-
+    
     const linksWithUserId = await ctx.db
       .query("linksToUsers")
       .withIndex("by_userId", (q) => q.eq("userId", userId))
@@ -37,28 +37,6 @@ export const addUrl = mutation({
       name: args.name,
       url: args.url,
     });
-    // const userId = await getAuthUserId(ctx);
-    // if (!userId) {
-    //   throw new ConvexError("Please login to add a new url");
-    // }
-
-    // if (!args.url) {
-    //   throw new ConvexError("Please add a valid url");
-    // }
-    // // rate limit component
-    // const first = await rateLimiter.limit(ctx, "addUrl",{ key: userId } );
-
-    // const randomId = randomisedId();
-    // const linkId = await ctx.db.insert("links", {
-    //   name: args.name ? args.name : randomId,
-    //   url: args.url,
-    //   clicks: 0,
-    // });
-
-    // await ctx.db.insert("linksToUsers", {
-    //   userId: userId,
-    //   linkId: linkId,
-    // });
   },
 });
 
@@ -74,19 +52,19 @@ export const testMutation = internalMutation({
       throw new ConvexError("Please add a valid url");
     }
     // rate limit component
-    // const { ok, retryAfter } = await rateLimiter.limit(ctx, "addUrl");
-      const randomId = randomisedId();
-      const linkId = await ctx.db.insert("links", {
-        name: args.name ? args.name : randomId,
-        url: args.url,
-        clicks: 0,
-      });
+    const  {ok, retryAfter } = await rateLimiter.limit(ctx, "addUrl", { key: userId, throws:true, count:3, });
+    const randomId = randomisedId();
+    const linkId = await ctx.db.insert("links", {
+      name: args.name ? args.name : randomId,
+      url: args.url,
+      clicks: 0,
+    });
 
-      await ctx.db.insert("linksToUsers", {
-        userId: userId,
-        linkId: linkId,
-      });
-     },
+    await ctx.db.insert("linksToUsers", {
+      userId: userId,
+      linkId: linkId,
+    });
+  },
 });
 
 export const deleteLink = mutation({
