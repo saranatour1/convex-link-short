@@ -12,7 +12,7 @@ export const Anon = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     console.log(user);
-    if (!user && user === null) {
+    if (!user) {
       void signIn("anonymous", { redirectTo: "/" });
     }
   }, [user]);

@@ -11,9 +11,9 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as crons from "../crons.js";
 import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
-import type * as init from "../init.js";
 import type * as links from "../links.js";
 import type * as users from "../users.js";
 
@@ -32,9 +32,9 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  crons: typeof crons;
   helpers: typeof helpers;
   http: typeof http;
-  init: typeof init;
   links: typeof links;
   users: typeof users;
 }>;
