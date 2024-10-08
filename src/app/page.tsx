@@ -1,12 +1,12 @@
-import { Anon } from "@/components/Anon";
 import { Display } from "@/components/Display";
 import { ShortnerForm } from "@/components/ShortnerForm";
+import { Fragment } from "react";
 
 export default function Home() {
   return (
-    <Anon>
+    <Fragment>
       <ShortnerForm />
       <Display />
-    </Anon>
+    </Fragment>
   );
 }

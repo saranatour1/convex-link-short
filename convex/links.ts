@@ -1,9 +1,8 @@
-import { z } from "zod";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import { randomisedId } from "./helpers";
-import { HOUR, MINUTE, RateLimiter, SECOND } from "@convex-dev/ratelimiter";
+import { MINUTE, RateLimiter } from "@convex-dev/ratelimiter";
 import { components, internal } from "./_generated/api";
 
 const rateLimiter = new RateLimiter(components.ratelimiter, {
